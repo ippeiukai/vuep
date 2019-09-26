@@ -1,11 +1,12 @@
 export default function (input) {
-  const html = document.createElement('div')
-  const content = html.innerHTML = input.trim()
+  const compiler = require('vue-template-compiler')
+  const content = input.trim();
+  const parsed_input = compiler.parseComponent(content)
 
   try {
-    const template = html.querySelector('template')
-    const script = html.querySelector('script')
-    const styles = Array.prototype.slice.call(html.querySelectorAll('style')).map(n => n.innerHTML)
+    const template = parsed_input.template
+    const script = parsed_input.script
+    const styles = Array.prototype.slice.call(parsed_input.styles).map(function (n) { return n.content; });
 
     if (!template && !script && !styles.length) {
       return {
@@ -15,9 +16,9 @@ export default function (input) {
     }
 
     return {
-      content: /<\/script>$/g.test(content) ? content : (content + '\n</script>'),
-      template: template ? template.innerHTML : '',
-      script: script ? script.innerHTML : '',
+      content,
+      template: template ? template.content : '',
+      script: script ? script.content : '',
       styles: styles
     }
   } catch (error) {
