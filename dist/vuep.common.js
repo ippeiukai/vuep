@@ -164,13 +164,14 @@ function getDocumentStyle () {
 }
 
 var parser = function (input) {
-  var html = document.createElement('div');
-  var content = html.innerHTML = input.trim();
+  var compiler = require('vue-template-compiler');
+  var content = input.trim();
+  var parsed_input = compiler.parseComponent(content);
 
   try {
-    var template = html.querySelector('template');
-    var script = html.querySelector('script');
-    var styles = Array.prototype.slice.call(html.querySelectorAll('style')).map(function (n) { return n.innerHTML; });
+    var template = parsed_input.template;
+    var script = parsed_input.script;
+    var styles = Array.prototype.slice.call(parsed_input.styles).map(function (n) { return n.content; });
 
     if (!template && !script && !styles.length) {
       return {
@@ -180,9 +181,9 @@ var parser = function (input) {
     }
 
     return {
-      content: /<\/script>$/g.test(content) ? content : (content + '\n</script>'),
-      template: template ? template.innerHTML : '',
-      script: script ? script.innerHTML : '',
+      content: content,
+      template: template ? template.content : '',
+      script: script ? script.content : '',
       styles: styles
     }
   } catch (error) {
